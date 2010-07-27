@@ -31,7 +31,8 @@ Reset the recorded number of tests run to zero."
   (setf (tests-run producer) 0))
 
 (defgeneric init-test (producer stream)
-  (:documentation "Test initialization / header output."))
+  (:documentation "Test initialization / header output.")
+  (:method (producer stream)))
 (defgeneric emit-plan (producer stream &key plan plan-argument &allow-other-keys)
   (:documentation "A so-called test plan is used e.g. by TAP as a means of
 cross-checking proper test suite execution."))
@@ -45,4 +46,5 @@ Increase the recorded number of tests by one."
 (defgeneric emit-comment (producer stream comment)
   (:documentation "Emit a comment, if available for this kind of producer."))
 (defgeneric finalize-test (producer stream)
-  (:documentation "Emit final test output."))
+  (:documentation "Emit final test output.")
+  (:method (producer stream)))

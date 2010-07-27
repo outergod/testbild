@@ -18,15 +18,22 @@
 
 (defclass x-unit-producer (producer)
   ((fill-column :initarg :fill-column
+                :initform nil
                 :reader producer-fill-column
                 :documentation "Line feeds will be inserted after FILL-COLUMN
 characters if set."))
   (:documentation "Producer for xUnit style test output."))
 
+(defmethod init-test ((producer x-unit-producer) stream)
+  "init-test producer stream => nil
+
+xUnit output always starts on a fresh line."
+  (fresh-line stream))
+
 (defmethod emit-result :before ((producer x-unit-producer) stream &key success description directive reason &allow-other-keys)
   "emit-result :before producer stream &key success description directive reason &allow-other-keys => nil
 
-Ensure output proceeds on a fresh line after FILL-COLUMN test assertions, is set."
+Ensure output proceeds on a fresh line after FILL-COLUMN test assertions, if set."
   (declare (ignore success description directive reason))
   (with-accessors ((tests-run tests-run)
                    (fill-column producer-fill-column))
@@ -42,6 +49,7 @@ xUnit output consists of single characters per assertion."
   (declare (ignore description reason))
   (write-char (cond ((null directive)
                      (if success #\. #\E))
+                    ((eql :fatal directive) #\F)
                     ((eql :todo directive) #\I)
                     ((eql :skip directive) #\S)
                     (t (error (format nil "~s is not a recognized test directive" directive))))
@@ -54,3 +62,8 @@ xUnit has no support for comments so we use STDERR."
   (declare (ignore stream))
   (format *error-output* "~a~%" comment))
   
+(defmethod finalize-test ((producer x-unit-producer) stream)
+  "finalize-test producer stream => nil
+
+xUnit output always ends with a line feed."
+  (terpri stream))

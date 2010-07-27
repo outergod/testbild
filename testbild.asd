@@ -32,4 +32,5 @@
                           :components
                           ((:file "package")
                            (:file "producer" :depends-on ("package"))
-                           (:file "tap" :depends-on ("package" "producer"))))))
+                           (:file "tap" :depends-on ("package" "producer"))
+                           (:file "x-unit" :depends-on ("package" "producer"))))))

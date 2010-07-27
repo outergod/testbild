@@ -81,9 +81,11 @@ TAP test results must always begin at the beginning of a line."
 (defmethod emit-result ((producer tap-producer) stream &key (success t) description directive reason &allow-other-keys)
   "emit-result producer stream &key (success t) description directive reason &allow-other-keys => nil
 
-TAP style test result emitter. DIRECTIVE types :TODO and :SKIP are supported."
+TAP style test result emitter. DIRECTIVE types :TODO and :SKIP are supported,
+:FATAL is ignored."
   (format stream "~:[not ~;~]ok ~d ~@[- ~a ~]" success (tests-run producer) description)
-  (cond ((null directive)
+  (cond ((or (null directive)
+             (eql :fatal directive))
          (terpri stream))
         ((eql :todo directive)
          (emit-comment producer stream (format nil "TODO~@[ ~a~]~%" reason)))
@@ -99,3 +101,4 @@ known EOL delimiter combinations and output with a hash mark in front each."
   (mapc #'(lambda (string)
             (format stream "# ~a~%" string))
         (cl-ppcre:split "(\\r?\\n|\\r)" comment)))
+
