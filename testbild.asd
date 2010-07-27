@@ -22,7 +22,7 @@
 (in-package :testbild-system)
 
 (asdf:defsystem :testbild
-                :description "TAP and univeral test production and consumption facility"
+                :description "Universal test output production and consumption facility"
                 :version "0.0.1"
                 :author "Alexander Kahl <e-user@fsfe.org>"
                 :license "GPLv3+"
