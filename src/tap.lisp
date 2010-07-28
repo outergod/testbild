@@ -82,10 +82,10 @@ TAP test results must always begin at the beginning of a line."
   "emit-result producer stream &key (success t) description directive reason &allow-other-keys => nil
 
 TAP style test result emitter. DIRECTIVE types :TODO and :SKIP are supported,
-:FATAL is ignored."
+:error is ignored."
   (format stream "~:[not ~;~]ok ~d ~@[- ~a ~]" success (tests-run producer) description)
   (cond ((or (null directive)
-             (eql :fatal directive))
+             (eql :error directive))
          (terpri stream))
         ((eql :todo directive)
          (emit-comment producer stream (format nil "TODO~@[ ~a~]~%" reason)))

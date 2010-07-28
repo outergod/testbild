@@ -49,7 +49,7 @@ xUnit output consists of single characters per assertion."
   (declare (ignore description reason))
   (write-char (cond ((null directive)
                      (if success #\. #\F))
-                    ((eql :fatal directive) #\E)
+                    ((eql :error directive) #\E)
                     ((eql :todo directive) #\I)
                     ((eql :skip directive) #\S)
                     (t (error (format nil "~s is not a recognized test directive" directive))))
