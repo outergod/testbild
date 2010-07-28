@@ -17,4 +17,18 @@
 (in-package :testbild-system)
 
 (defpackage :testbild
-  (:use :cl :graylex))
+  (:use :cl :graylex)
+  (:export :producer
+           :tests-run
+           :init-test
+           :emit-plan
+           :emit-result
+           :emit-comment
+           :emit-bailout
+           :finalize-test
+           :tap-producer
+           :tap-version
+           :supported-tap-versions
+           :x-unit-producer
+           :producer-fill-column))
+
