@@ -17,10 +17,10 @@
 (in-package :testbild-test-system)
 
 (defpackage :testbild-test
-  (:use :cl :testbild)
+  (:use :cl :stefil :testbild)
   (:export :all))
 
-(in-package :cl-m4-test)
+(in-package :testbild-test)
 
 (in-root-suite)
 (defsuite all)

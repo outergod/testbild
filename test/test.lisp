@@ -15,3 +15,5 @@
 ;;;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (in-package :testbild-test)
+
+(set-dispatch-macro-character #\# #\> #'cl-heredoc:read-heredoc)

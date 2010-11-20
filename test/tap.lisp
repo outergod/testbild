@@ -16,6 +16,54 @@
 
 (in-package :testbild-test)
 
-(in-suite root)
+(in-suite all)
 (defsuite tap)
 (in-suite tap)
+
+(defmacro test-tap-sequence ((producer stream expected) &body body)
+  (let ((string (gensym)))
+    `(let ((,string (make-array 0 :element-type 'character
+                                  :adjustable t :fill-pointer 0))
+           (,producer (make-instance 'tap-producer)))
+       (with-output-to-string (,stream ,string)
+         ,@body
+         (is (string= ,string ,expected))))))
+
+(defmacro deftaptest (name expected &body body)
+  `(deftest ,name ()
+     (test-tap-sequence (producer stream ,expected)
+       ,@body)))
+
+(deftaptest emit-nothing #>eof>TAP version 13
+eof
+  (init-test producer stream))
+
+(deftaptest emit-ok-nodesc #>eof>TAP version 13
+ok 1
+eof
+  (init-test producer stream)
+  (emit-result producer stream))
+
+(deftaptest emit-nok-nodesc #>eof>TAP version 13
+not ok 1
+eof
+  (init-test producer stream)
+  (emit-result producer stream :success nil))
+
+(deftaptest emit-ok-desc #>eof>TAP version 13
+ok 1 - Hello World!
+eof
+  (init-test producer stream)
+  (emit-result producer stream :description "Hello World"))
+
+(deftaptest emit-nok-desc #>eof>TAP version 13
+not ok 1 - Goodbye World!
+eof
+  (init-test producer stream)
+  (emit-result producer stream :success nil :description "Goodbye World!"))
+
+(deftaptest emit-simple-plan #>eof>TAP version 13
+1..3
+eof
+  (init-test producer stream)
+  (emit-plan producer stream :plan-argument 3))
