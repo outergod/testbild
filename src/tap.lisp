@@ -83,13 +83,15 @@ TAP test results must always begin at the beginning of a line."
 
 TAP style test result emitter. DIRECTIVE types :TODO and :SKIP are supported,
 :error is ignored."
-  (format stream "~:[not ~;~]ok ~d ~@[- ~a ~]" success (tests-run producer) description)
+  (format stream "~:[not ~;~]ok ~d~@[ - ~a~]" success (tests-run producer) description)
   (cond ((or (null directive)
              (eql :error directive))
          (terpri stream))
         ((eql :todo directive)
+         (write-char #\space stream)
          (emit-comment producer stream (format nil "TODO~@[ ~a~]~%" reason)))
         ((eql :skip directive)
+         (write-char #\space stream)
          (emit-comment producer stream (format nil "SKIP~@[ ~a~]~%" reason)))
         (t (error (format nil "~s is not a recognized test directive" directive)))))
 
