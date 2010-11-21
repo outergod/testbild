@@ -3,23 +3,24 @@ testbild - Universal test output production and consumption facility
 TBD unit testing [1]
 
 testbild is completely written in Common Lisp and licensed under the
-GPLv3+[2]. Please see the file COPYING in the top-level directory of the
-distribution tarball or see the link at [2] if you didn't receive a copy along
+[GPLv3+] [2]. Please see the file COPYING in the top-level directory of the
+distribution tarball or see the link above if you didn't receive a copy along
 with this file.
 
 
 Installation
-============
+------------
 Please see file INSTALL.
 
 
 Links and References
-====================
+--------------------
 Homepage: http://www.cliki.net/testbild
 Hacking:  http://github.com/e-user/testbild
 
-[1] http://en.wikipedia.org/wiki/Unit_testing
-[2] http://www.gnu.org/licenses/gpl-3.0-standalone.html
+[1]: http://en.wikipedia.org/wiki/Unit_testing
+[2]: http://www.gnu.org/licenses/gpl-3.0-standalone.html
+
 
 
 --------------------------------------------------------------------------------
