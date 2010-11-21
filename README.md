@@ -15,8 +15,8 @@ Please see file INSTALL.
 
 Links and References
 --------------------
-Homepage: http://www.cliki.net/testbild  
-Hacking:  http://github.com/e-user/testbild
+Homepage: <http://www.cliki.net/testbild>  
+Hacking:  <http://github.com/e-user/testbild>
 
 [1]: http://en.wikipedia.org/wiki/Unit_testing
 [2]: http://www.gnu.org/licenses/gpl-3.0-standalone.html
