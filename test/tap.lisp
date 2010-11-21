@@ -21,13 +21,15 @@
 (in-suite tap)
 
 (defmacro test-tap-sequence ((producer stream expected) &body body)
-  (let ((string (gensym)))
+  (let ((string (gensym))
+        (out (gensym)))
     `(let ((,string (make-array 0 :element-type 'character
                                   :adjustable t :fill-pointer 0))
            (,producer (make-instance 'tap-producer)))
-       (with-output-to-string (,stream ,string)
-         ,@body
-         (is (string= ,string ,expected))))))
+       (with-output-to-string (,out ,string)
+         (let ((,stream (make-instance 'test-output-stream :stream ,out)))
+           ,@body
+           (is (string= ,string ,expected)))))))
 
 (defmacro deftaptest (name expected &body body)
   `(deftest ,name ()
@@ -54,7 +56,7 @@ eof
 ok 1 - Hello World!
 eof
   (init-test producer stream)
-  (emit-result producer stream :description "Hello World"))
+  (emit-result producer stream :description "Hello World!"))
 
 (deftaptest emit-nok-desc #>eof>TAP version 13
 not ok 1 - Goodbye World!

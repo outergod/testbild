@@ -26,7 +26,7 @@
                 :version "0.0.1"
                 :author "Alexander Kahl <e-user@fsfe.org>"
                 :license "GPLv3+"
-                :depends-on (:testbild :stefil :cl-heredoc)
+                :depends-on (:testbild :stefil :cl-heredoc :trivial-gray-streams)
                 :components
                 ((:module "test"
                           :components
