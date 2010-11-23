@@ -17,7 +17,11 @@
 (in-package :testbild)
 
 (defclass producer ()
-  ((tests-run :initform 0
+  ((stream :initarg :stream
+           :initform *standard-output*
+           :accessor test-producer-stream
+           :documentation "Stream to use for test output")
+   (tests-run :initform 0
               :accessor tests-run
               :documentation "Recorded number of test results emitted using this
 producer."))
@@ -30,26 +34,26 @@ Reset the recorded number of tests run to zero."
   (declare (ignore initargs))
   (setf (tests-run producer) 0))
 
-(defgeneric init-test (producer stream)
+(defgeneric init-test (producer)
   (:documentation "Test initialization / header output.")
-  (:method (producer stream)))
-(defgeneric emit-plan (producer stream &key plan plan-argument &allow-other-keys)
+  (:method (producer)))
+(defgeneric emit-plan (producer &key plan plan-argument &allow-other-keys)
   (:documentation "A so-called test plan is used e.g. by TAP as a means of
 cross-checking proper test suite execution.")
-  (:method (producer stream &key plan plan-argument &allow-other-keys)))
-(defgeneric emit-result (producer stream &key success description directive reason &allow-other-keys)
+  (:method (producer &key plan plan-argument &allow-other-keys)))
+(defgeneric emit-result (producer &key success description directive reason &allow-other-keys)
   (:documentation "Emit the result from running an test / an assertion.")
-  (:method :before ((producer producer) stream &key success description directive reason &allow-other-keys)
-    "emit-result :before producer stream &key success description directive reason &allow-other-keys => number
+  (:method :before ((producer producer) &key success description directive reason &allow-other-keys)
+    "emit-result :before producer &key success description directive reason &allow-other-keys => number
 
 Increase the recorded number of tests by one."
     (incf (tests-run producer))))
-(defgeneric emit-comment (producer stream comment)
+(defgeneric emit-comment (producer comment)
   (:documentation "Emit a comment, if available for this kind of producer.")
-  (:method (producer stream comment)))
-(defgeneric emit-bailout (producer stream &optional reason)
+  (:method (producer comment)))
+(defgeneric emit-bailout (producer  &optional reason)
   (:documentation "Emit a bail-out, if available for this kind of producer.")
-  (:method (producer stream &optional reason)))
-(defgeneric finalize-test (producer stream)
+  (:method (producer &optional reason)))
+(defgeneric finalize-test (producer)
   (:documentation "Emit final test output.")
-  (:method (producer stream)))
+  (:method (producer)))

@@ -24,14 +24,14 @@
 characters if set."))
   (:documentation "Producer for xUnit style test output."))
 
-(defmethod init-test ((producer x-unit-producer) stream)
-  "init-test producer stream => nil
+(defmethod init-test ((producer x-unit-producer))
+  "init-test producer => nil
 
 xUnit output always starts on a fresh line."
-  (fresh-line stream))
+  (fresh-line (test-producer-stream producer)))
 
-(defmethod emit-result :before ((producer x-unit-producer) stream &key success description directive reason &allow-other-keys)
-  "emit-result :before producer stream &key success description directive reason &allow-other-keys => nil
+(defmethod emit-result :before ((producer x-unit-producer) &key success description directive reason &allow-other-keys)
+  "emit-result :before producer &key success description directive reason &allow-other-keys => nil
 
 Ensure output proceeds on a fresh line after FILL-COLUMN test assertions, if set."
   (declare (ignore success description directive reason))
@@ -40,10 +40,10 @@ Ensure output proceeds on a fresh line after FILL-COLUMN test assertions, if set
       producer
     (when (and fill-column
                (zerop (mod tests-run fill-column)))
-      (fresh-line stream))))
+      (fresh-line (test-producer-stream producer)))))
 
-(defmethod emit-result ((producer x-unit-producer) stream &key (success t) description directive reason &allow-other-keys)
-  "emit-result producer stream &key (success t) description directive reason &allow-other-keys => nil
+(defmethod emit-result ((producer x-unit-producer) &key (success t) description directive reason &allow-other-keys)
+  "emit-result producer &key (success t) description directive reason &allow-other-keys => nil
 
 xUnit output consists of single characters per assertion."
   (declare (ignore description reason))
@@ -53,17 +53,16 @@ xUnit output consists of single characters per assertion."
                     ((eql :todo directive) #\I)
                     ((eql :skip directive) #\S)
                     (t (error (format nil "~s is not a recognized test directive" directive))))
-              stream))
+              (test-producer-stream producer)))
 
-(defmethod emit-comment ((producer x-unit-producer) stream comment)
-  "emit-comment producer stream comment => nil
+(defmethod emit-comment ((producer x-unit-producer) comment)
+  "emit-comment producer comment => nil
 
 xUnit has no support for comments so we use STDERR."
-  (declare (ignore stream))
   (format *error-output* "~a~%" comment))
   
-(defmethod finalize-test ((producer x-unit-producer) stream)
-  "finalize-test producer stream => nil
+(defmethod finalize-test ((producer x-unit-producer))
+  "finalize-test producer => nil
 
 xUnit output always ends with a line feed."
-  (terpri stream))
+  (terpri (test-producer-stream producer)))

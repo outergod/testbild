@@ -24,10 +24,10 @@
   (let ((string (gensym))
         (out (gensym)))
     `(let ((,string (make-array 0 :element-type 'character
-                                  :adjustable t :fill-pointer 0))
-           (,producer (make-instance 'tap-producer)))
+                                  :adjustable t :fill-pointer 0)))
        (with-output-to-string (,out ,string)
-         (let ((,stream (make-instance 'test-output-stream :stream ,out)))
+         (let* ((,stream (make-instance 'test-output-stream :stream ,out))
+                (,producer (make-instance 'tap-producer :stream ,stream)))
            ,@body
            (is (string= ,string ,expected)))))))
 
@@ -38,34 +38,34 @@
 
 (deftaptest emit-nothing #>eof>TAP version 13
 eof
-  (init-test producer stream))
+  (init-test producer))
 
 (deftaptest emit-ok-nodesc #>eof>TAP version 13
 ok 1
 eof
-  (init-test producer stream)
-  (emit-result producer stream))
+  (init-test producer)
+  (emit-result producer))
 
 (deftaptest emit-nok-nodesc #>eof>TAP version 13
 not ok 1
 eof
-  (init-test producer stream)
-  (emit-result producer stream :success nil))
+  (init-test producer)
+  (emit-result producer :success nil))
 
 (deftaptest emit-ok-desc #>eof>TAP version 13
 ok 1 - Hello World!
 eof
-  (init-test producer stream)
-  (emit-result producer stream :description "Hello World!"))
+  (init-test producer)
+  (emit-result producer :description "Hello World!"))
 
 (deftaptest emit-nok-desc #>eof>TAP version 13
 not ok 1 - Goodbye World!
 eof
-  (init-test producer stream)
-  (emit-result producer stream :success nil :description "Goodbye World!"))
+  (init-test producer)
+  (emit-result producer :success nil :description "Goodbye World!"))
 
 (deftaptest emit-simple-plan #>eof>TAP version 13
 1..3
 eof
-  (init-test producer stream)
-  (emit-plan producer stream :plan-argument 3))
+  (init-test producer)
+  (emit-plan producer :plan-argument 3))

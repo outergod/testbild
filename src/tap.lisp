@@ -38,69 +38,74 @@ Ensure the chosen TAP version is actually supported by TAP-PRODUCER."
     (assert (find version supported) ()
             (format nil "TAP version ~d is not among the supported versions [~{~a~^, ~}]" version supported))))
 
-(defmethod init-test ((producer tap-producer) stream)
-  "init-test producer stream => nil
+(defmethod init-test ((producer tap-producer))
+  "init-test producer => nil
 
 TAP version 13 and higher supports an optional version line in the header."
-  (with-accessors ((version tap-version))
+  (with-accessors ((version tap-version)
+                   (stream test-producer-stream))
       producer
     (when (>= version 13)
-      (format stream "~&TAP version ~d~%" (tap-version producer)))))
+      (format stream "~&TAP version ~d~%" version))))
 
-(defmethod emit-plan :before ((producer tap-producer) stream &key plan plan-argument)
-  "emit-plan :before producer stream &key plan plan-argument => nil
+(defmethod emit-plan :before ((producer tap-producer) &key plan plan-argument)
+  "emit-plan :before producer &key plan plan-argument => nil
 
 TAP test plans must always begin at the beginning of a line and start with
 \"1..\"."
   (declare (ignore plan plan-argument))
-  (format stream "~&1.."))
+  (format (test-producer-stream producer) "~&1.."))
 
-(defmethod emit-plan ((producer tap-producer) stream &key (plan :simple) plan-argument &allow-other-keys)
-  "emit-plan producer stream &key (plan :simple) plan-argument => nil
+(defmethod emit-plan ((producer tap-producer) &key (plan :simple) plan-argument &allow-other-keys)
+  "emit-plan producer &key (plan :simple) plan-argument => nil
 
 TAP plans can be of type :SIMPLE or :SKIP, the latter means to skip all tests
 within the suite."
-  (cond ((eql :simple plan)
-         (assert (and (integerp plan-argument)
-                      (> plan-argument 0))
-                 (plan-argument)
-                 ":PLAN-ARGUMENT must be a positive integer for simple plans")
-         (format stream "~d~%" plan-argument))
-        ((eql :skip plan)
-         (princ "0 " stream)
-         (emit-comment producer stream (format nil "SKIP~@[ ~a~]~%" plan-argument)))
-        (t (error (format nil "~s is not a recognized plan type" plan)))))
-  
-(defmethod emit-result :before ((producer tap-producer) stream &key success description directive reason &allow-other-keys)
-  "emit-result :before producer stream &key success description directive reason &allow-other-keys => nil
+  (with-slots (stream)
+      producer
+    (cond ((eql :simple plan)
+           (assert (and (integerp plan-argument)
+                        (> plan-argument 0))
+                   (plan-argument)
+                   ":PLAN-ARGUMENT must be a positive integer for simple plans")
+           (format stream "~d~%" plan-argument))
+          ((eql :skip plan)
+           (princ "0 " stream producer)
+           (emit-comment producer (format nil "SKIP~@[ ~a~]~%" plan-argument)))
+          (t (error (format nil "~s is not a recognized plan type" plan))))))
+
+(defmethod emit-result :before ((producer tap-producer) &key success description directive reason &allow-other-keys)
+  "emit-result :before producer &key success description directive reason &allow-other-keys => nil
 
 TAP test results must always begin at the beginning of a line."
   (declare (ignore producer success description directive reason))
-  (fresh-line stream))
+  (fresh-line (test-producer-stream producer)))
 
-(defmethod emit-result ((producer tap-producer) stream &key (success t) description directive reason &allow-other-keys)
-  "emit-result producer stream &key (success t) description directive reason &allow-other-keys => nil
+(defmethod emit-result ((producer tap-producer) &key (success t) description directive reason &allow-other-keys)
+  "emit-result producer &key (success t) description directive reason &allow-other-keys => nil
 
 TAP style test result emitter. DIRECTIVE types :TODO and :SKIP are supported,
 :error is ignored."
-  (format stream "~:[not ~;~]ok ~d~@[ - ~a~]" success (tests-run producer) description)
-  (cond ((or (null directive)
-             (eql :error directive))
-         (terpri stream))
-        ((eql :todo directive)
-         (write-char #\space stream)
-         (emit-comment producer stream (format nil "TODO~@[ ~a~]~%" reason)))
-        ((eql :skip directive)
-         (write-char #\space stream)
-         (emit-comment producer stream (format nil "SKIP~@[ ~a~]~%" reason)))
-        (t (error (format nil "~s is not a recognized test directive" directive)))))
+  (with-accessors ((stream test-producer-stream))
+      producer
+    (format stream "~:[not ~;~]ok ~d~@[ - ~a~]" success (tests-run producer) description)
+    (cond ((or (null directive)
+               (eql :error directive))
+           (terpri stream))
+          ((eql :todo directive)
+           (write-char #\space stream)
+           (emit-comment producer (format nil "TODO~@[ ~a~]~%" reason)))
+          ((eql :skip directive)
+           (write-char #\space stream)
+           (emit-comment producer (format nil "SKIP~@[ ~a~]~%" reason)))
+          (t (error (format nil "~s is not a recognized test directive" directive))))))
 
-(defmethod emit-comment ((producer tap-producer) stream comment)
-  "emit-comment producer stream comment => comment-list
+(defmethod emit-comment ((producer tap-producer) comment)
+  "emit-comment producer comment => comment-list
 
 TAP comments are delimited by hash marks and EOLs so COMMENT is split by all
 known EOL delimiter combinations and output with a hash mark in front each."
   (mapc #'(lambda (string)
-            (format stream "# ~a~%" string))
+            (format (test-producer-stream producer) "# ~a~%" string))
         (cl-ppcre:split "(\\r?\\n|\\r)" comment)))
 
