@@ -8,7 +8,7 @@ Support for TAP consumption is planned.
 
 testbild is completely written in Common Lisp and licensed under the
 [GPLv3+] [gpl]. Please see the file COPYING in the top-level directory of the
-distribution tarball or see the link at [2] if you didn't receive a copy along
+distribution tarball or see the link above if you didn't receive a copy along
 with this file.
 
 
