@@ -17,10 +17,7 @@
 (in-package :testbild-test-system)
 
 (defpackage :testbild-test
-  (:use :cl :stefil :testbild :trivial-gray-streams)
-  (:export :all))
+  (:use :cl :testbild :trivial-gray-streams)
+  (:export :run))
 
 (in-package :testbild-test)
-
-(in-root-suite)
-(defsuite all)

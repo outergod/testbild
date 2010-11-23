@@ -16,10 +16,6 @@
 
 (in-package :testbild-test)
 
-(in-suite all)
-(defsuite tap)
-(in-suite tap)
-
 (defmacro test-tap-sequence ((producer stream expected) &body body)
   (let ((string (gensym))
         (out (gensym)))
@@ -29,10 +25,10 @@
          (let* ((,stream (make-instance 'test-output-stream :stream ,out))
                 (,producer (make-instance 'tap-producer :stream ,stream)))
            ,@body
-           (is (string= ,string ,expected)))))))
+           (ok ,string ,expected))))))
 
 (defmacro deftaptest (name expected &body body)
-  `(deftest ,name ()
+  `(deftest
      (test-tap-sequence (producer stream ,expected)
        ,@body)))
 

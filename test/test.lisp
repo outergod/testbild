@@ -18,6 +18,8 @@
 
 (set-dispatch-macro-character #\# #\> #'cl-heredoc:read-heredoc)
 
+;;; String output streams don't properly support BEGINNING-OF-LINE-P at least
+;;; for SBCL so we just implement that ourselves :)
 (defclass test-output-stream (fundamental-character-output-stream trivial-gray-stream-mixin)
    ((stream :initarg :stream
             :reader test-stream
@@ -44,3 +46,24 @@ refers to the beginning of a line")
 
 (defmethod stream-write-char ((stream test-output-stream) character)
   (write-char character (test-stream stream)))
+
+
+;;; We cannot rely on any test framework like stefil that we expect to support
+;;; testbild itself, so testing is done manually
+(defparameter *tests* nil)
+
+(defmacro deftest (&body body)
+  `(push #'(lambda ()
+             ,@body)
+         *tests*))
+
+(let ((tests-run))
+  (defun run ()
+    (setq tests-run 0)
+    (format t "~&1..~d~%" (length *tests*))
+    (mapcar #'funcall *tests*))
+
+  (defun ok (got expected &optional description)
+    (format t "~&~:[not ~;~]ok ~d~@[ - ~a~]~%"
+            (string= got expected)    
+            (incf tests-run) description)))
