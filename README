@@ -1,0 +1,131 @@
+testbild - Universal test output production and consumption facility
+====================================================================
+testbild is a Common Lisp library designed to provide a common interface for
+[Unit Testing] [test] output. Currently it supports [TAP] [tap] (versions 12,
+13) and [xUnit] [xunit] style output.
+
+Support for TAP consumption is planned.
+
+testbild is completely written in Common Lisp and licensed under the
+[GPLv3+] [gpl]. Please see the file COPYING in the top-level directory of the
+distribution tarball or see the link at [2] if you didn't receive a copy along
+with this file.
+
+
+Installation
+------------
+Please see file INSTALL.
+
+
+Usage
+-----
+If you're using a testing framework, maybe it already offers support for
+testbild. If not, go and push its authors to check it out or maybe even provide
+them with patches that integrate the framework with testbild yourself!
+
+In case you're one of said authors or doing the testing all by yourself, read
+on:
+
+Generally, testbild is comprised by a set of CLOS classes, `producer` being the
+root class. It defines the minimal interface which is mostly influenced by TAP,
+the output style known for offering most capabilities, but implements void
+default methods for all generics save from `emit-result` which is the bare
+minimum to implement for a test output class. `producer` also (re)sets and
+internal test counter upon (re)initialization available via the accessor
+`tests-run`, thus no additional effort has to be put into test producers relying
+on test counters.
+
+Output producer implementations should only differ in instance initialization
+arguments and keywords allowed as values for `directive`, one of `emit-result`'s
+`&key` arguments, hence being the only things differing between subclasses to be
+taken care of by its user.
+
+Integrating low-level test code with testbild should be done as follows:
+
+* Generate a fresh test producer instance that is tied to the execution of a
+  test suite, file etc., e.g. by creating a closure or using a special variable
+* Couple the start of test code execution with `init-test`
+* Same for termination and `finalize-test`
+* To comply with TAP, have the user define a "test plan" no matter which output
+  they choose and execute `emit-plan` right after `init-test` or right before
+  `finalize-test`
+* Use and/or provide `emit-comment` and `emit-bailout` as desired
+
+A typical use case might be as follows:
+
+    CL-USER> (let ((producer (make-instance 'tap-producer)))
+               (init-test producer)
+               (emit-plan producer :plan-argument 3) ; simple plan, three tests planned
+               (emit-result producer :success (= (+ 1 2) 3) :description "test whether 1+2 equals 3")
+               (emit-comment producer "Math is fun!")
+               (emit-result producer :success (eql nil 42) :description "42 is the answer!" :directive :todo :reason "But we're still in hunt of the question..")
+               (emit-result producer :success t :directive :skip :reason "Skipping stuff is also supported")
+               (finalize-test producer))
+    TAP version 13
+    1..3
+    ok 1 - test whether 1+2 equals 3
+    # Math is fun!
+    not ok 2 - 42 is the answer! # TODO But we're still in hunt of the question..
+    ok 3 # SKIP Skipping stuff is also supported
+
+If _x-unit-producer_ was used instead, this would have been the output:
+
+    .IS
+on STDOUT and
+
+    Math is fun!
+on STDERR as xUnit has no native support for comments.
+
+
+Missing Stuff
+-------------
+* TAP
+  * Support for [YAMLish] [yamlish] diagnostics
+  * Consumer part
+* Other formats
+  * Story / BDD
+  * TestDox
+
+History
+-------
+While there are many nice testing framework for Common Lisp and writing your own
+test code is especially easy with the most powerful language on earth, most if
+not all of said frameworks use an inferior report style usually found in and
+associated with the xUnit family of unit testing frameworks, even though there
+is a formally specified, clearly superior alternative available: TAP, Test
+Anything Protocol.
+
+In lack of TAP support _testbild_, which is the German word for (TV) test
+pattern but also interpretable as (overall) "test appearance", was written to
+help both test and test framework authors exploit the features of TAP without
+losing support for different reporting styles.
+
+
+Links and References
+--------------------
+Homepage: http://www.cliki.net/testbild  
+Hacking:  http://github.com/e-user/testbild
+
+[gpl]: http://www.gnu.org/licenses/gpl-3.0-standalone.html
+[test]: http://en.wikipedia.org/wiki/Unit_testing
+[tap]: http://testanything.org/
+[xunit]: http://en.wikipedia.org/wiki/XUnit
+[yamlish]: http://testanything.org/wiki/index.php?title=YAMLish&oldid=1930
+
+
+
+--------------------------------------------------------------------------------
+Copyright (C) 2010  Alexander Kahl <e-user@fsfe.org>
+This file is part of testbild.
+testbild is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+testbild is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
