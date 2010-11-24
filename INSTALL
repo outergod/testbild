@@ -15,7 +15,6 @@ Foundation:
 CL libraries (all asdf-install:able):
 - CL-PPCRE | http://www.weitz.de/cl-ppcre/
 - graylex  | http://www.cliki.net/graylex
-- Stefil   | http://common-lisp.net/project/stefil/
 
 Your distribution might provide some of these libraries but the names may
 differ, i.e. try to search for the libraries' names prefixed with `cl-` if not
