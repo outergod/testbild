@@ -65,3 +65,10 @@ eof
 eof
   (init-test producer)
   (emit-plan producer :plan-argument 3))
+
+;;; Reproduces https://github.com/e-user/testbild/issues#issue/1
+(deftaptest github-issue-1 #>eof>TAP version 13
+1..0 # SKIP
+eof
+  (init-test producer)
+  (emit-plan producer :plan :skip))
