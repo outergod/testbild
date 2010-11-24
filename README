@@ -95,7 +95,7 @@ associated with the xUnit family of unit testing frameworks, even though there
 is a formally specified, clearly superior alternative available: TAP, Test
 Anything Protocol.
 
-In lack of TAP support _testbild_, which is the German word for (TV) test
+In lack of TAP support _Testbild_, which is the German word for (TV) test
 pattern but also interpretable as (overall) "test appearance", was written to
 help both test and test framework authors exploit the features of TAP without
 losing support for different reporting styles.
