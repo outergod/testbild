@@ -70,7 +70,7 @@ within the suite."
                    ":PLAN-ARGUMENT must be a positive integer for simple plans")
            (format stream "~d~%" plan-argument))
           ((eql :skip plan)
-           (princ "0 " stream producer)
+           (princ "0 " stream)
            (emit-comment producer (format nil "SKIP~@[ ~a~]~%" plan-argument)))
           (t (error (format nil "~s is not a recognized plan type" plan))))))
 
