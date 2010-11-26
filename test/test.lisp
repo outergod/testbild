@@ -50,18 +50,18 @@ refers to the beginning of a line")
 
 ;;; We cannot rely on any test framework like stefil that we expect to support
 ;;; testbild itself, so testing is done manually
-(defparameter *tests* nil)
+(defparameter *tests* (make-hash-table))
 
-(defmacro deftest (&body body)
-  `(push #'(lambda ()
-             ,@body)
-         *tests*))
+(defmacro deftest (name &body body)
+  `(setf (gethash ',name *tests*)
+         #'(lambda ()
+             ,@body)))
 
 (let ((tests-run))
   (defun run ()
     (setq tests-run 0)
-    (format t "~&1..~d~%" (length *tests*))
-    (mapcar #'funcall *tests*))
+    (format t "~&1..~d~%" (hash-table-count *tests*))
+    (alexandria:maphash-values #'funcall *tests*))
 
   (defun ok (got expected &optional description)
     (format t "~&~:[not ~;~]ok ~d~@[ - ~a~]~%"

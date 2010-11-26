@@ -16,7 +16,7 @@
 
 (in-package :testbild-test)
 
-(defmacro test-tap-sequence ((producer stream expected) &body body)
+(defmacro test-tap-sequence ((producer stream expected &optional description) &body body)
   (let ((string (gensym))
         (out (gensym)))
     `(let ((,string (make-array 0 :element-type 'character
@@ -25,50 +25,74 @@
          (let* ((,stream (make-instance 'test-output-stream :stream ,out))
                 (,producer (make-instance 'tap-producer :stream ,stream)))
            ,@body
-           (ok ,string ,expected))))))
+           (ok ,string ,expected ,description))))))
 
-(defmacro deftaptest (name expected &body body)
-  `(deftest
-     (test-tap-sequence (producer stream ,expected)
+(defmacro deftaptest (name expected (&optional description) &body body)
+  `(deftest ,name
+     (test-tap-sequence (producer stream ,expected ,description)
        ,@body)))
 
 (deftaptest emit-nothing #>eof>TAP version 13
 eof
+  ("basic functionality")
   (init-test producer))
 
-(deftaptest emit-ok-nodesc #>eof>TAP version 13
-ok 1
+(deftaptest emit-nothing #>eof>TAP version 13
 eof
+  ("finalizing")
   (init-test producer)
+  (finalize-test producer))
+
+(deftaptest emit-ok-nodesc #>eof>ok 1
+eof
+  ("ok without description")
   (emit-result producer))
 
-(deftaptest emit-nok-nodesc #>eof>TAP version 13
-not ok 1
+(deftaptest emit-nok-nodesc #>eof>not ok 1
 eof
-  (init-test producer)
+  ("not ok without description")
   (emit-result producer :success nil))
 
-(deftaptest emit-ok-desc #>eof>TAP version 13
-ok 1 - Hello World!
+(deftaptest emit-ok-desc #>eof>ok 1 - Hello World!
 eof
-  (init-test producer)
+  ("ok with description")
   (emit-result producer :description "Hello World!"))
 
-(deftaptest emit-nok-desc #>eof>TAP version 13
-not ok 1 - Goodbye World!
+(deftaptest emit-nok-desc #>eof>not ok 1 - Goodbye World!
 eof
-  (init-test producer)
+  ("not ok with description")
   (emit-result producer :success nil :description "Goodbye World!"))
 
-(deftaptest emit-simple-plan #>eof>TAP version 13
-1..3
+(deftaptest emit-simple-plan #>eof>1..3
 eof
-  (init-test producer)
+  ("simple plan emission")
   (emit-plan producer :plan-argument 3))
 
 ;;; Reproduces https://github.com/e-user/testbild/issues#issue/1
-(deftaptest github-issue-1 #>eof>TAP version 13
-1..0 # SKIP
+(deftaptest github-issue-1 #>eof>1..0 # SKIP
 eof
-  (init-test producer)
+  ("check for github-issue-1 regression")
   (emit-plan producer :plan :skip))
+
+(deftaptest emit-ok-empty-desc #>eof>ok 1 - 
+eof
+  ("ok with empty description")
+  (emit-result producer :description ""))
+
+(deftaptest emit-mixed-set #>eof>TAP version 13
+1..5
+ok 1
+not ok 2
+ok 3
+ok 4
+not ok 5
+eof
+  ("mixed tests, sequence numbers")
+  (init-test producer)
+  (emit-plan producer :plan-argument 5)
+  (emit-result producer)
+  (emit-result producer :success nil)
+  (emit-result producer)
+  (emit-result producer)
+  (emit-result producer :success nil)
+  (finalize-test producer))
